@@ -28,13 +28,13 @@ The basic Kafka settings:
 - consumerCount = 3 (same as partitions on the topic)
 
 ## The Route 
-The Camel route is consuming messages from the topic. It will perform basic validation and then do a series of inserts and updates into the database. 
+The Camel route is consuming messages from the topic. It will perform basic validation and then do a series of inserts and updates into the database. Note, the provided test omits any calls to an actual database.
 
-Depending on various errors they are considered retryable or non-retryable. An example of the former might be a failure to connect to the database. An example of the latter might be missing data in the database. 
+The errors that are occur in the application are evaluated and categorized as either retryable or non-retryable. An example of the former might be a failure to connect to the database. An example of the latter might be missing data in the database. 
 
-When a retryable problem is encountered, the exception is thrown and is unhandled in order to force Camel to roll back any database activity that has already been performed. The Kafka offset is not committed. This allows the message to be re-consumed and processed once the problem is corrected.
+When a retryable problem is encountered, the exception is thrown and is unhandled in order to force Camel to roll back any database activity that has already been performed. The Kafka offset is not committed. This allows the message to be re-consumed and processed once the problem is corrected. This test omits any errors that would be retryable.
 
-When a non-retryable problem is encountered, the exceptions is also thrown and is unhandled. This is also to force Camel to roll back any database activity that has already been performed. In this case the Kafka offset is committed so that the message is not seen again. 
+When a non-retryable problem is encountered, the exception is also thrown and is left unhandled. This is to force Camel to roll back any database activity that has already been performed. In this case the Kafka offset is committed so that the message is not seen again. 
 
 ## Using breakOnFirstError and the subsequent behavior 
 
@@ -49,22 +49,22 @@ Based on the way we have the route written and the expected behavior in Camel we
 - consume the message at the partition:offset (2:3)
 - throw an exception that is unhandled
 - commit the offset manually (2:3)
-- the undhandled exception is handled by Camel (rollback) 
-- the `KafkaRecordProcessor` will log > Will seek consumer to offset 2 and start polling again.
+- the unhandled exception is handled by Camel (rollback any DB activity) 
+- the `KafkaRecordProcessor` will log the following: _Will seek consumer to offset 2 and start polling again._
 
 then:
 
 - consume the message at the partition:offset (2:3) for a second time
 - throw an exception that is unhandled
 - commit the offset manually (2:3)
-- the undhandled exception is handled by Camel (rollback) 
-- the `KafkaRecordProcessor` will log > Will seek consumer to offset -1 and start polling again.
+- the unhandled exception is handled by Camel (rollback any DB activity) 
+- the `KafkaRecordProcessor` will log the following: _Will seek consumer to offset -1 and start polling again._
 
 then:
 
 - consume the message at the partition:offset (2:4)
 
-At the end of the rest run, this is the expected result 
+At the end of the rest run, this is the expected result based on what was published (not necessarily in this order).
 
 | Payload Body         | Times Processed  | 
 |----------------------|------------------|
@@ -82,7 +82,7 @@ At the end of the rest run, this is the expected result
 | 11			           | 1 times
 
 If the test is re-run several times, it will (eventually) have an issue where the offset is set incorrectly.
-The attached log (src/logs) has the following (as it started to replay messages)
+One of the attached logs has the following (as it started to replay messages)
 
 | Payload Body         | Times Processed  | 
 |----------------------|------------------|
@@ -97,6 +97,8 @@ The attached log (src/logs) has the following (as it started to replay messages)
 | 7			           | 1 times
 | 8			           | 1 times
 | 10			           | 1 times
+
+Here is a high-level annotation of the logs for this run
 
 The NORETRY-ERROR was written to partition 0 with an offset of 1.
 It was consumed:
