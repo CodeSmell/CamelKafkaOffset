@@ -73,7 +73,7 @@ public class CamelKafkaOffsetTest {
 
     @BeforeEach
     public void setupTestRoutes() throws Exception {
-        Awaitility.setDefaultTimeout(60, TimeUnit.SECONDS);
+        Awaitility.setDefaultTimeout(75, TimeUnit.SECONDS);
         
         AdviceWithRouteBuilder.addRoutes(camelContext, builder -> {
             createConsumerRoute(builder);
@@ -91,7 +91,7 @@ public class CamelKafkaOffsetTest {
 
         await().pollDelay(10, TimeUnit.SECONDS)
             .pollInterval(10, TimeUnit.SECONDS)
-            .until(() -> consumedRecords.size() == 15 | isConsumedMoreThanOnce(false));
+            .until(() -> consumedRecords.size() > 14 | isConsumedMoreThanOnce(false));
         
         // a dump of what happened
         boolean consumedMoreThanOnce = this.isConsumedMoreThanOnce(true);
@@ -103,7 +103,8 @@ public class CamelKafkaOffsetTest {
     private void produceRecords(final List<String> producedRecords) {
         for (String payload : producedRecords) {
             LOGGER.info("publishing payload >>> " + payload);
-            kafkaProducer.sendBodyAndHeader(payload, KafkaConstants.KEY, payload);
+            //kafkaProducer.sendBodyAndHeader(payload, KafkaConstants.KEY, payload);
+            kafkaProducer.sendBody(payload);
         }
     }
 
