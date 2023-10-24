@@ -8,6 +8,10 @@ What makes this particular observation tough to catch and debug is that it appea
 
 Under the `src/logs` are 3 text files representing the logs for 3 separate runs of the provided test. Two of these logs capture the scenario where the offset is reset incorrectly. One of the logs captures what is expected to occur. The bottom of this README annotates the issue from the logs.
 
+This was submitted with the following issue for Apache Camel
+
+- [CAMEL-20044](https://issues.apache.org/jira/browse/CAMEL-20044)
+
 I did find some issues in Apache Camel that seem to be similar
 
 - [CAMEL-14935](https://issues.apache.org/jira/browse/CAMEL-14935)
