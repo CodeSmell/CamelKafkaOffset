@@ -4,7 +4,7 @@ We were seeing lag in our application and figured it was do to low partitions an
 
 When a message has an exception, the `breakOnFirstError` will cause the partition/offset to be replayed again after the consumer is removed and readded to the consumer group. The 2nd time it occurs, it is typically followed by a seek to -1. This allows the consumer to move forward through the rest of the messages in that partition. However, it appears that sometimes the offset will be set to the value from another partition. That value can then result in the consumer reading from the partition where the error occurred in the wrong place. 
 
-What makes this particular observation is that it appears to be intermittent. 
+What makes this particular observation tough to catch and debug is that it appears to be intermittent. 
 
 Under the `src/logs` are 3 text files representing the logs for 3 separate runs of the provided test. Two of these logs capture the scenario where the offset is reset incorrectly. One of the logs captures what is expected to occur. The bottom of this README annotates the issue from the logs. 
 
