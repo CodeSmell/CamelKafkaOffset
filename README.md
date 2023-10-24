@@ -183,7 +183,7 @@ NORETRY-ERROR
 2023-10-24 | 09:52:22.714 | ERROR | [Camel (camel-1) thread #1 - KafkaConsumer[foobarTopic]] | o.a.c.p.e.DefaultErrorHandler (CamelLogger.java:205) | Failed delivery for (MessageId: 6561DE1EA878C39-0000000000000001 on ExchangeId: 6561DE1EA878C39-0000000000000001). Exhausted after delivery attempt: 1 caught: codesmell.exception.NonRetryException: NON RETRY ERROR TRIGGERED BY TEST. Processed by failure processor: FatalFallbackErrorHandler[null]
 ```
 
-This time when the consumer is removed from the consumer group the seek should use -1 so that it moves forward. However, it seeks to offset 4 instead. This seems to be the offset assigned to partition 2. Observations suggest it is always grabbing the current offset from another partition. 
+This time when the consumer is removed from the consumer group the seek should use -1 so that it moves forward. This is the "normal" behavior for Camel when this occurs (though it seems like a cleaner and simpler design to honor the commit and not replay the message IMO). However, it seeks to offset 4 instead. This seems to be the offset assigned to partition 2. Observations suggest it is always grabbing the current offset from another partition. 
 
 ```
 2023-10-24 | 09:52:22.715 | WARN  | [Camel (camel-1) thread #1 - KafkaConsumer[foobarTopic]] | o.a.c.c.k.c.s.KafkaRecordProcessor (KafkaRecordProcessor.java:132) | Will seek consumer to offset 4 and start polling again.
