@@ -6,7 +6,13 @@ When a message has an exception, the `breakOnFirstError` will cause the partitio
 
 What makes this particular observation tough to catch and debug is that it appears to be intermittent. 
 
-Under the `src/logs` are 3 text files representing the logs for 3 separate runs of the provided test. Two of these logs capture the scenario where the offset is reset incorrectly. One of the logs captures what is expected to occur. The bottom of this README annotates the issue from the logs. 
+Under the `src/logs` are 3 text files representing the logs for 3 separate runs of the provided test. Two of these logs capture the scenario where the offset is reset incorrectly. One of the logs captures what is expected to occur. The bottom of this README annotates the issue from the logs.
+
+I did find some issues in Apache Camel that seem to be similar
+
+- [CAMEL-14935](https://issues.apache.org/jira/browse/CAMEL-14935)
+- [CAMEL-18350](https://issues.apache.org/jira/browse/CAMEL-18350)
+- [CAMEL-19894](https://issues.apache.org/jira/browse/CAMEL-19894)
 
 ## The Environment
 The issue was first observed with the consumer running:
