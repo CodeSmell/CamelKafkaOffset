@@ -41,7 +41,7 @@ public final class CamelUtil {
         sb.append("Message consumed from ");
         sb.append(exchange.getMessage().getHeader(KafkaConstants.TOPIC, String.class));
         sb.append(eol);
-        sb.append("The Partion:Offset is ");
+        sb.append("The Partition:Offset is ");
         sb.append(exchange.getMessage().getHeader(KafkaConstants.PARTITION, String.class));
         sb.append(":");
         sb.append(exchange.getMessage().getHeader(KafkaConstants.OFFSET, String.class));
