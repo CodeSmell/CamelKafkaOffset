@@ -33,6 +33,14 @@
     <logger name="ch.qos.logback.core.joran.action" level="WARN"/>
     <logger name="ch.qos.logback.classic.joran.action" level="WARN"/>
     
+    <logger name="org.apache.camel.component.kafka.KafkaFetchRecords" level="TRACE"/>
+    <logger name="org.apache.camel.component.kafka.consumer.support.KafkaRecordProcessorFacade" level="TRACE"/>
+    <logger name="org.apache.camel.component.kafka.consumer.support.KafkaRecordProcessor" level="TRACE"/>
+    <logger name="org.apache.camel.component.kafka.consumer.CommitManagers" level="DEBUG"/>
+	<logger name="org.apache.camel.component.kafka.consumer.NoopCommitManager" level="DEBUG"/>
+	<logger name="org.apache.camel.component.kafka.consumer.DefaultKafkaManualSyncCommit" level="DEBUG"/>
+	<logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="WARN"/>
+    
     <logger name="kafka.server" level="WARN"/>
 	<logger name="kafka.zookeeper" level="WARN"/>
 	<logger name="kafka.network" level="WARN"/>
@@ -42,8 +50,10 @@
 	<logger name="kafka.zk" level="WARN"/>
 	<logger name="kafka.log" level="WARN"/>
 	<logger name="state.change.logger" level="WARN"/>
-	<logger name="org.apache.kafka.clients.consumer.ConsumerConfig" level="WARN"/>
+	<logger name="org.apache.kafka.clients.Metadata" level="WARN"/>
 	<logger name="org.apache.kafka.clients.admin.AdminClientConfig" level="WARN"/>
+	<!-- this gives good info on what happens unsubscribing and resubscribing -->
+	<logger name="org.apache.kafka.clients.consumer.internals.ConsumerCoordinator" level="WARN"/>
 	<logger name="org.apache.kafka.clients.producer" level="WARN"/>
 	<logger name="org.apache.zookeeper" level="WARN"/>
 

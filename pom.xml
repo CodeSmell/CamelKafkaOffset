@@ -29,6 +29,12 @@
 			<groupId>org.apache.camel.springboot</groupId>
 			<artifactId>camel-spring-boot-starter</artifactId>
 			<version>${camel.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.apache.camel</groupId>
+					<artifactId>camel-kafka</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
@@ -40,10 +46,17 @@
 			<artifactId>camel-spring</artifactId>
 			<version>${camel.version}</version>
 		</dependency>
+		<!-- 
+			quick swap version
+			to test the fix
+		-->
 		<dependency>
 			<groupId>org.apache.camel</groupId>
 			<artifactId>camel-kafka</artifactId>
+			<version>3.21.3-SNAPSHOT</version>
+			<!--
 			<version>${camel.version}</version>
+			-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.camel</groupId>
