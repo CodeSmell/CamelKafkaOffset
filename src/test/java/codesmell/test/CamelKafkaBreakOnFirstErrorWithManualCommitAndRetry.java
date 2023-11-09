@@ -25,15 +25,21 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.Import;
 import org.springframework.kafka.test.context.EmbeddedKafka;
 
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static org.apache.camel.builder.endpoint.StaticEndpointBuilders.direct;
 import static org.apache.camel.builder.endpoint.StaticEndpointBuilders.kafka;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 
 /**
@@ -48,8 +54,8 @@ import static org.awaitility.Awaitility.await;
     CamelConfig.class
     })
 @EmbeddedKafka(controlledShutdown = true, partitions = 1)
-public class CamelKafkaBreakOnFirstErrorWithOnException {
-    private static final Logger LOGGER = LoggerFactory.getLogger(CamelKafkaBreakOnFirstErrorWithOnException.class);
+public class CamelKafkaBreakOnFirstErrorWithManualCommitAndRetry {
+    private static final Logger LOGGER = LoggerFactory.getLogger(CamelKafkaBreakOnFirstErrorWithManualCommitAndRetry.class);
    
     private final String ROUTE_ID = "kafkaConsumerBreakOnFirstError";
     
@@ -76,12 +82,9 @@ public class CamelKafkaBreakOnFirstErrorWithOnException {
     }
 
     @Test
-    public void shouldRetryPayloadWithErrorTwice() throws Exception {
+    public void shouldRetryPayloadWithErrorRetried() throws Exception {
         
-        List<String> payloadsToPublish = List.of("1", "2", "3", "4", "5", "6", "7", "8");
-        List<String> expectedConsumedRecords = List.of("1", "2", "3", "4", "5", "5", "6", "7", "8");
-
-
+        List<String> payloadsToPublish = List.of("1", "2", "3", "4", "5", "6", "7");
         this.produceRecords(payloadsToPublish);
         
         camelContext.getRouteController().startRoute(ROUTE_ID);
@@ -90,8 +93,15 @@ public class CamelKafkaBreakOnFirstErrorWithOnException {
             .timeout(3, TimeUnit.SECONDS)
             .pollDelay(1, TimeUnit.SECONDS)
             .until(() -> consumedRecords.size() > 8);
+        
+        assertFalse(consumedRecords.stream()
+            .anyMatch(v -> "6".equals(v)));
+        
+        assertFalse(consumedRecords.stream()
+            .anyMatch(v -> "7".equals(v)));
+        
+        this.isConsumedMoreThanOnce();
             
-        assertThat(consumedRecords).isEqualTo(expectedConsumedRecords);
     }
 
     private void produceRecords(final List<String> recordsToPublish) {
@@ -105,8 +115,10 @@ public class CamelKafkaBreakOnFirstErrorWithOnException {
                 // would leave this exception unhandled
                 // but also commit offset
                 .handled(false)
-                .log(LoggingLevel.ERROR, "Having an unretryable issue due to ${exception.message}")
-                .process(this::doCommitOffset)
+                .log(LoggingLevel.ERROR, "Will retry payload that is having an issue due to ${exception.message}")
+                // Don't commit offset
+                // forcing continuous retry
+                //.process(this::doCommitOffset)
                 .end();
         
         builder
@@ -161,5 +173,19 @@ public class CamelKafkaBreakOnFirstErrorWithOnException {
         var basic = kafka(kafkaTopicName)
                 .brokers(kafkaBrokerAddress);
         return basic;
+    }
+    
+    private LinkedHashMap<String, Long> generateMapOfConsumedRecordsWithCounts() {
+        return consumedRecords.stream()
+                //.filter(s -> !s.equals("NORETRY-ERROR"))
+                .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                .entrySet().stream()
+                    .sorted(Map.Entry.comparingByValue(Collections.reverseOrder()))
+                    .collect(LinkedHashMap::new, (m,e) -> m.put(e.getKey(), e.getValue()), Map::putAll);
+    }
+    
+    private void isConsumedMoreThanOnce() {
+        LinkedHashMap<String, Long> countMap = this.generateMapOfConsumedRecordsWithCounts();
+        assertThat(countMap.get("5")).isGreaterThan(1);
     }
 }
