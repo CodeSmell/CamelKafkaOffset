@@ -79,8 +79,11 @@ public class CamelKafkaBreakOnFirstErrorWithManualCommit {
     public void shouldRetryPayloadWithErrorTwice() throws Exception {
         
         List<String> payloadsToPublish = List.of("1", "2", "3", "4", "5", "6", "7", "8");
-        List<String> expectedConsumedRecords = List.of("1", "2", "3", "4", "5", "5", "6", "7", "8");
-
+        
+        // current behavior
+        //List<String> expectedConsumedRecords = List.of("1", "2", "3", "4", "5", "5", "6", "7", "8");
+        // new behavior
+        List<String> expectedConsumedRecords = List.of("1", "2", "3", "4", "5", "6", "7", "8");
 
         this.produceRecords(payloadsToPublish);
         
@@ -89,7 +92,7 @@ public class CamelKafkaBreakOnFirstErrorWithManualCommit {
         await()
             .timeout(3, TimeUnit.SECONDS)
             .pollDelay(1, TimeUnit.SECONDS)
-            .until(() -> consumedRecords.size() > 8);
+            .until(() -> consumedRecords.size() > (expectedConsumedRecords.size() -1));
             
         assertThat(consumedRecords).isEqualTo(expectedConsumedRecords);
     }

@@ -86,11 +86,19 @@ public class CamelKafkaOffsetTest {
         final List<String> producedRecords = List.of("1", "2", "3", "4", "5", "NORETRY-ERROR",
                 "6", "7", "NORETRY-ERROR", "8", "9", "10", "11");
 
+        // old behavior
+//        int lowCount = 15;
+//        int highCount = 16;
+        
+        // new behavior
+        int lowCount = 13;
+        int highCount = 13;
+        
         this.produceRecords(producedRecords);
 
         await().pollDelay(10, TimeUnit.SECONDS)
             .pollInterval(10, TimeUnit.SECONDS)
-            .until(() -> consumedRecords.size() > 14 | isConsumedMoreThanOnce(false));
+            .until(() -> consumedRecords.size() > (lowCount -1) | isConsumedMoreThanOnce(false));
         
         // a dump of what happened
         boolean consumedMoreThanOnce = this.isConsumedMoreThanOnce(true);
@@ -100,7 +108,7 @@ public class CamelKafkaOffsetTest {
         // should be 15
         // but the latent issue 
         // will sometimes result in 16
-        assertThat(consumedRecords.size()).isBetween(15, 16);
+        assertThat(consumedRecords.size()).isBetween(lowCount, highCount);
     }
 
     private void produceRecords(final List<String> producedRecords) {
